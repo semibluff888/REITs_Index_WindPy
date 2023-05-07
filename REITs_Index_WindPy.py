@@ -49,7 +49,8 @@ w.isconnected()  # 判断WindPy是否已经登录成功
 
 start_date = "2021-06-21"  # 起始日
 end_date = "2023-04-30"  # 截止日
-path = r"D:\Work\DailyReport"  # 保存文件及图片的路径
+# path = r"D:\Work\DailyReport"  # 保存文件及图片的路径
+output_file = f'REITs_Index_Report_{end_date}.xlsx'
 
 # 获取最新的全部REITs成分股
 # 板块ID的代码可以通过WIND=》量化=》数据接口=》代码生成器=》数据集WSET=》板块成分=》参数名称SECTORID，编辑=》参数值修改下拉菜单。
@@ -59,7 +60,8 @@ reits_list = w.wset("sectorconstituent", "sectorid=1000041324000000", usedf=True
 
 # 区分为产权类和经营权类
 # 项目属性(fund_reitsrproperty)：产权类/特许经营类；资产类型(fund__reitstype)：园区基础设施/交通基础设施/仓储物流/...等
-df = w.wss(reits_list, "fund_reitsrproperty, fund__reitstype", usedf=True)[1]
+df = w.wss(reits_list, "fund_exchangeshortname, fund_reitsrproperty, fund__reitstype", usedf=True)[
+    1]  # 基金场内简称：fund_exchangeshortname
 reits_list_CQ = df[df["fund_reitsrproperty".upper()] == "产权类"].index.to_list()
 reits_list_JY = df[df["fund_reitsrproperty".upper()] == "特许经营类"].index.to_list()
 
@@ -67,8 +69,9 @@ reits_list_JY = df[df["fund_reitsrproperty".upper()] == "特许经营类"].index
 assets_list_str = '000300.SH;000852.SH;000688.SH;CBA00203.CS;NH0100.NHF'
 
 # 保存到excel
-with pd.ExcelWriter(path + '\\' + 'REITs_Index_Report.xlsx') as writer:  # 首次创建，默认写模式mode='w'
+with pd.ExcelWriter(output_file) as writer:  # 首次创建，默认写模式mode='w'
     df.to_excel(writer, sheet_name='C-REITs列表')
+
 
 #######################################################################################################################
 # 2、构造REITs指数
@@ -213,7 +216,7 @@ def Create_Index(codes_list, output_name):
     plt.close()  # 为了防止后续plt.savefig()会包含之前的图片产生重叠，关闭掉。也可以使用plt.show()
 
     # 保存到excel
-    with pd.ExcelWriter(path + '\\' + 'REITs_Index_Report.xlsx', mode='a', engine='openpyxl') as writer:  # 追加模式并指定引擎
+    with pd.ExcelWriter(output_file, mode='a', engine='openpyxl') as writer:  # 追加模式并指定引擎
         df_index.to_excel(writer, sheet_name=f'{output_name}')
 
     return df_index
@@ -324,7 +327,7 @@ sns.heatmap(df_assets.corr(), cmap='RdYlGn', vmax=1, vmin=-1, center=0, annot=Tr
 plt.savefig("大类资产相关性.png", dpi=500, bbox_inches='tight')
 plt.close()  # 防止后续图片重叠
 # 保存到excel
-with pd.ExcelWriter(path + '\\' + 'REITs_Index_Report.xlsx', mode='a', engine='openpyxl') as writer:  # 追加模式并指定引擎
+with pd.ExcelWriter(output_file, mode='a', engine='openpyxl') as writer:  # 追加模式并指定引擎
     df_assets.corr().to_excel(writer, sheet_name='大类资产相关性')
 # ***************************************************************************************************
 
@@ -348,7 +351,7 @@ sns.heatmap(df.corr(), cmap='RdYlGn', vmax=1, vmin=-1, center=0, annot=True, fmt
 plt.savefig("REITs相关性.png", dpi=500, bbox_inches='tight')
 plt.close()  # 防止后续图片重叠
 # 保存到excel
-with pd.ExcelWriter(path + '\\' + 'REITs_Index_Report.xlsx', mode='a', engine='openpyxl') as writer:  # 追加模式并指定引擎
+with pd.ExcelWriter(output_file, mode='a', engine='openpyxl') as writer:  # 追加模式并指定引擎
     df.corr().to_excel(writer, sheet_name='REITs相关性')
 #######################################################################################################################
 
@@ -474,7 +477,7 @@ plt.legend(bbox_to_anchor=(0.5, -0.7), loc=8, borderaxespad=0, fontsize=11, ncol
 plt.savefig("REITs风险收益.png", dpi=500, bbox_inches='tight')
 plt.close()  # 防止后续图片重叠
 # 保存到excel
-with pd.ExcelWriter(path + '\\' + 'REITs_Index_Report.xlsx', mode='a', engine='openpyxl') as writer:  # 追加模式并指定引擎
+with pd.ExcelWriter(output_file, mode='a', engine='openpyxl') as writer:  # 追加模式并指定引擎
     df_risk.to_excel(writer, sheet_name='REITs风险收益')
 
 # ***************************************************************************************************
@@ -509,7 +512,7 @@ texts = [plt.gca().text(df_risk['月度波动率'].iloc[i], df_risk['月均收�
 plt.savefig("大类资产风险收益.png", dpi=500, bbox_inches='tight')
 plt.close()  # 防止后续图片重叠
 # 保存到excel
-with pd.ExcelWriter(path + '\\' + 'REITs_Index_Report.xlsx', mode='a', engine='openpyxl') as writer:  # 追加模式并指定引擎
+with pd.ExcelWriter(output_file, mode='a', engine='openpyxl') as writer:  # 追加模式并指定引擎
     df_risk.to_excel(writer, sheet_name='大类资产风险收益')
 #######################################################################################################################
 
@@ -554,7 +557,7 @@ df_test.plot(xlim=('2021-08-01', end_date), ylim=(-1, 1), figsize=(10, 5))  # df
 plt.savefig("滚动相关性.png", dpi=500, bbox_inches='tight')
 plt.close()  # 防止后续图片重叠
 # 保存到excel
-with pd.ExcelWriter(path + '\\' + 'REITs_Index_Report.xlsx', mode='a', engine='openpyxl') as writer:  # 追加模式并指定引擎
+with pd.ExcelWriter(output_file, mode='a', engine='openpyxl') as writer:  # 追加模式并指定引擎
     df_test.to_excel(writer, sheet_name='滚动相关性')
 #######################################################################################################################
 
@@ -611,7 +614,7 @@ plt.gca().xaxis.set_major_formatter(FuncFormatter(to_percent))  # x轴百分位�
 plt.savefig("最大回撤率.png", dpi=500, bbox_inches='tight')
 plt.close()  # 防止后续图片重叠
 # 保存到excel
-with pd.ExcelWriter(path + '\\' + 'REITs_Index_Report.xlsx', mode='a', engine='openpyxl') as writer:  # 追加模式并指定引擎
+with pd.ExcelWriter(output_file, mode='a', engine='openpyxl') as writer:  # 追加模式并指定引擎
     df_tmp.to_excel(writer, sheet_name='最大回撤率')
 
 
