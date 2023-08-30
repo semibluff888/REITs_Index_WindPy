@@ -48,7 +48,7 @@ w.isconnected()  # 判断WindPy是否已经登录成功
 
 
 start_date = "2021-06-21"  # 起始日
-end_date = "2023-04-30"  # 截止日
+end_date = "2023-07-31"  # 截止日
 # path = r"D:\Work\DailyReport"  # 保存文件及图片的路径
 output_file = f'REITs_Index_Report_{end_date}.xlsx'
 
@@ -298,6 +298,10 @@ df_tmp = pd.merge(
     left_index=True, right_index=True
 
 )
+
+# 2023-08-29 Bo：
+df_tmp = df_tmp * 100
+# 2023-08-29 Bo:注意上面的涨跌幅乘以100，与WIND涨跌幅口径保持一致，后面统一再除100
 
 df_assets = pd.merge(
     df_tmp,
